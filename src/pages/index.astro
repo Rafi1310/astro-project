@@ -1,5 +1,34 @@
 ---
+    const baseURL = 'https://api.themoviedb.org/3'
+    const endpoint = '/movie/122?append_to_response=videos' // Bijvoorbeeld de ID voor Inception
+    const url = baseURL + endpoint
 
+	const token = import.meta.env.TMDB_TOKEN;
+
+    // 1. Maak je options object met de Bearer token
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`
+        }
+    };
+
+    // 2. Geef de options mee als tweede parameter in je fetch
+    let response = await fetch(url, options)
+    
+    // 3. Pak de JSON data uit
+    let movieInfo = await response.json();
+    
+	let trailerInfo: any = null;
+
+	if (movieInfo.videos && movieInfo.videos.results) {
+    trailerInfo = movieInfo.videos.results.find(
+        (video) => video.site === 'YouTube' && video.type === 'Trailer'
+    );
+}
+    // 4. Print de titel (let op: TMDb gebruikt .title in plaats van .data.name)
+    console.log(movieInfo)
 ---
 
 <html lang="en">
@@ -7,11 +36,73 @@
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="stylesheet" href="/src/pages/styles/style.css">
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
+		<style>
+			iframe {
+				border: none;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		{/* We verpakken alles in een 'movie-card' voor een mooi kader */}
+    <div class="movie-card">
+        <h1>{movieInfo.title}</h1>
+        <p class="tagline">{movieInfo.tagline}</p>
+        <p class="overview">{movieInfo.overview}</p>
+
+        <h2>Trailer</h2>
+
+        {trailerInfo ? (
+            <>
+                <button id="pip-knop">
+                    Open in Picture-in-Picture 🔲
+                </button>
+
+                <div id="trailer-container">
+                    <iframe 
+                        id="youtube-speler"
+                        src={`https://www.youtube.com/embed/${trailerInfo.key}`} 
+                        title={`Trailer van ${movieInfo.title}`}
+                        style="border: none;" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </>
+        ) : (
+            <p class="error-msg">Helaas, er is geen YouTube trailer gevonden voor deze film.</p>
+        )}
+    </div>
+
+	<!-- <h1 id="counter">0</h1>
+	<button id="add">+1</button> -->
+
+	<script>
+
+
+
+		// let value = 0;
+		// const counter = document.querySelector("#counter");
+		// const button = document.querySelector("#add");
+
+		// button.addEventListener("click", () => {
+		// 	value++;
+		// 	counter.textContent = value;
+
+		// 	const data = {
+		// 		counter: value
+		// 	};
+		// 	console.log(data);
+		// 	localStorage.setItem("count", JSON.stringify(data));
+		// });
+		// // const user = {
+		// // 	id: 1,
+		// // 	dark_theme: true,
+		// // 	name: "Alex"
+		// // }
+	</script>
 	</body>
 </html>

@@ -1,0 +1,86 @@
+/* 1. De achtergrond van de hele pagina */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212; /* Mooi diep donkergrijs/zwart */
+        color: #ffffff; /* Witte tekst */
+        margin: 0;
+        padding: 40px 20px;
+        display: flex; /* Zorgt dat de kaart in het midden staat */
+        justify-content: center;
+    }
+
+    /* 2. De mooie zwevende container */
+    .movie-card {
+        background-color: #1e1e1e; /* Iets lichter dan de achtergrond */
+        max-width: 800px;
+        width: 100%;
+        border-radius: 16px; /* Ronde hoekjes */
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6); /* Zachte schaduw erachter */
+    }
+
+    /* 3. Tekstopmaak */
+    h1 {
+        margin-top: 0;
+        margin-bottom: 5px;
+        color: #e50914; /* Netflix rood als accentkleur! */
+        font-size: 3rem;
+    }
+
+    h2 {
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+        margin-top: 40px;
+    }
+
+    .tagline {
+        font-style: italic;
+        color: #aaaaaa;
+        margin-top: 0;
+        font-size: 1.2rem;
+    }
+
+    .overview {
+        line-height: 1.7;
+        font-size: 1.1rem;
+        color: #dddddd;
+    }
+
+    /* 4. Een gelikte knop */
+    #pip-knop {
+        background-color: #007bff; /* Mooi helderblauw */
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease; /* Zorgt voor een soepele animatie */
+        margin-bottom: 20px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Wat gebeurt er als je met je muis over de knop zweeft? */
+    #pip-knop:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px); /* De knop 'wipt' iets omhoog */
+    }
+
+    /* 5. De YouTube Video Responsief maken (16:9 verhouding) */
+    #trailer-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* Wiskundig trucje voor een 16:9 verhouding */
+        border-radius: 12px;
+        overflow: hidden; /* Houdt de video netjes binnen de ronde hoekjes */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    #youtube-speler {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
