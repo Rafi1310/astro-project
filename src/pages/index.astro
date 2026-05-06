@@ -1,108 +1,135 @@
 ---
-	import "../styles/style.css";
-    const baseURL = 'https://api.themoviedb.org/3'
-    const endpoint = '/movie/122?append_to_response=videos' // Bijvoorbeeld de ID voor Inception
-    const url = baseURL + endpoint
+import "../styles/style.css";
+const baseURL = 'https://api.themoviedb.org/3'
+const endpoint = '/movie/122?append_to_response=videos' // Bijvoorbeeld de ID voor Inception
+const url = baseURL + endpoint
 
-	const token = import.meta.env.TMDB_TOKEN;
+const token = import.meta.env.TMDB_TOKEN;
 
-    // 1. Maak je options object met de Bearer token
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`
-        }
-    };
+// 1. Maak je options object met de Bearer token
+const options = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${token}`
+    }
+};
 
-    // 2. Geef de options mee als tweede parameter in je fetch
-    let response = await fetch(url, options)
-    
-    // 3. Pak de JSON data uit
-    let movieInfo = await response.json();
-    
-	let trailerInfo: any = null;
+// 2. Geef de options mee als tweede parameter in je fetch
+let response = await fetch(url, options)
 
-	if (movieInfo.videos && movieInfo.videos.results) {
+// 3. Pak de JSON data uit
+let movieInfo = await response.json();
+
+let trailerInfo: any = null;
+
+if (movieInfo.videos && movieInfo.videos.results) {
     trailerInfo = movieInfo.videos.results.find(
-        (video) => video.site === 'YouTube' && video.type === 'Trailer'
+        (video: any) => video.site === 'YouTube' && video.type === 'Trailer'
     );
 }
-    // 4. Print de titel (let op: TMDb gebruikt .title in plaats van .data.name)
-    console.log(movieInfo)
+// 4. Print de data in je console
+console.log(movieInfo)
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-		<style>
-			iframe {
-				border: none;
-			}
-		</style>
-	</head>
-	<body>
-		{/* We verpakken alles in een 'movie-card' voor een mooi kader */}
+<html lang="nl">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        {/* Zet de titel van de pagina dynamisch */}
+        <title>{movieInfo.title}</title> 
+    </head>
+    <body>
+        
     <div class="movie-card">
-        <h1>{movieInfo.title}</h1>
-        <p class="tagline">{movieInfo.tagline}</p>
-        <p class="overview">{movieInfo.overview}</p>
+        
+        {/* 1. De Header Sectie (Poster + Tekst) */}
+        <div class="header-sectie">
+            
+            {/* De Filmposter */}
+            <img 
+                class="poster" 
+                src={`https://image.tmdb.org/t/p/w500${movieInfo.poster_path}`} 
+                alt={`Poster van ${movieInfo.title}`} 
+            />
+            
+            {/* HIER ontbrak in jouw code de 'tekst-sectie' div! */}
+            <div class="tekst-sectie">
+                <h1>{movieInfo.title}</h1>
+                <p class="tagline">{movieInfo.tagline}</p>
+                <p class="overview">{movieInfo.overview}</p>
+            </div> 
+            
+        </div> {/* Hier sluiten we de header-sectie div af */}
 
+        {/* 2. De Trailer Sectie */}
         <h2>Trailer</h2>
 
         {trailerInfo ? (
             <>
-                <button id="pip-knop">
-                    Open in Picture-in-Picture 🔲
-                </button>
-
                 <div id="trailer-container">
                     <iframe 
                         id="youtube-speler"
                         src={`https://www.youtube.com/embed/${trailerInfo.key}`} 
                         title={`Trailer van ${movieInfo.title}`}
-                        style="border: none;" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen>
                     </iframe>
                 </div>
+
+                <button id="pip-knop">
+                    Open in Picture-in-Picture 🔲
+                </button>
             </>
         ) : (
             <p class="error-msg">Helaas, er is geen YouTube trailer gevonden voor deze film.</p>
         )}
-    </div>
+        
+    </div> {/* Hier sluit de movie-card */}
 
-	<!-- <h1 id="counter">0</h1>
-	<button id="add">+1</button> -->
+    <script>
+        //@ts-nocheck
+        // 1. Zoek de knop, de container en de speler op
+        const pipKnop = document.getElementById('pip-knop');
+        const trailerContainer = document.getElementById('trailer-container');
+        const youtubeSpeler = document.getElementById('youtube-speler');
 
-	<script>
+        // Check of alles bestaat (voorkomt foutmeldingen als er geen trailer is)
+        if (pipKnop && youtubeSpeler && trailerContainer) {
+            
+            // 2. Luister naar een klik op de knop
+            pipKnop.addEventListener('click', async () => {
+                
+                // 3. Controleer of de browser deze nieuwe API ondersteunt
+                if ('documentPictureInPicture' in window) {
+                    try {
+                        // Open het zwevende PiP schermpje
+                        const pipWindow = await window.documentPictureInPicture.requestWindow({
+                            width: 560,
+                            height: 315,
+                        });
 
+                        // Verplaats de YouTube speler naar het nieuwe scherm
+                        pipWindow.document.body.appendChild(youtubeSpeler);
+                        // Haal de witruimte in het nieuwe schermpje weg
+                        pipWindow.document.body.style.margin = '0';
 
+                        // 4. Wat te doen als de gebruiker het PiP schermpje sluit?
+                        pipWindow.addEventListener('pagehide', () => {
+                            trailerContainer.appendChild(youtubeSpeler);
+                        });
 
-		// let value = 0;
-		// const counter = document.querySelector("#counter");
-		// const button = document.querySelector("#add");
-
-		// button.addEventListener("click", () => {
-		// 	value++;
-		// 	counter.textContent = value;
-
-		// 	const data = {
-		// 		counter: value
-		// 	};
-		// 	console.log(data);
-		// 	localStorage.setItem("count", JSON.stringify(data));
-		// });
-		// // const user = {
-		// // 	id: 1,
-		// // 	dark_theme: true,
-		// // 	name: "Alex"
-		// // }
-	</script>
-	</body>
+                    } catch (error) {
+                        console.error("PiP is mislukt:", error);
+                    }
+                } else {
+                    alert("Oeps! Jouw browser ondersteunt de Document PiP API helaas nog niet.");
+                }
+            });
+        }
+    </script>
+    </body>
 </html>
