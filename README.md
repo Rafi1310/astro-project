@@ -60,3 +60,6 @@ Feel free to check [our documentation](https://docs.astro.build) or jump into ou
 
 **Wat ga ik morgen doen**
 
+
+## Bronnenlijst
+- https://docs.astro.build/ar/guides/view-transitions/

@@ -111,3 +111,33 @@ body {
             max-width: 300px;
         }
     }
+
+    .terug-knop {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: #aaaaaa; /* Grijsachtige kleur */
+        font-weight: 600;
+        margin-bottom: 25px;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+    }
+
+    .terug-knop .pijl {
+        margin-right: 8px;
+        transition: transform 0.2s ease;
+    }
+
+    /* Effect als je er met de muis overheen gaat */
+    .terug-knop:hover {
+        color: #ffffff;
+        background-color: #333;
+        border-color: #444;
+    }
+
+    .terug-knop:hover .pijl {
+        transform: translateX(-4px); /* De pijl beweegt een stukje naar links */
+    }

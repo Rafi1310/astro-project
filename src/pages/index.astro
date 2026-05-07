@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import "../styles/style.css"; // Zorg dat dit pad klopt!
 
 const token = import.meta.env.TMDB_TOKEN;
@@ -33,6 +34,7 @@ const movies = [...data1.results, ...data2.results];
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Nieuwste Films - Overzicht</title>
+	<ClientRouter />
 </head>
 <body>
     <main>
@@ -50,6 +52,7 @@ const movies = [...data1.results, ...data2.results];
                         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
                         alt={movie.title} 
                         class="overzicht-poster"
+						transition:name={`poster-${movie.id}`}
                     />
                     <h2 class="overzicht-titel">{movie.title}</h2>
                 </a>

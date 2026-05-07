@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import "../../styles/style.css";
 
 // 1. NIEUW: Vertel Astro welke ID's er allemaal bestaan!
@@ -73,11 +74,16 @@ console.log(movieInfo)
         <meta name="generator" content={Astro.generator} />
         {/* Zet de titel van de pagina dynamisch */}
         <title>{movieInfo.title}</title> 
+        <ClientRouter />
     </head>
     <body>
         
     <div class="movie-card">
         
+        <a href="javascript:history.back()" class="terug-knop">
+            <span class="pijl">←</span> Terug naar overzicht
+        </a>
+
         {/* 1. De Header Sectie (Poster + Tekst) */}
         <div class="header-sectie">
             
@@ -86,6 +92,7 @@ console.log(movieInfo)
                 class="poster" 
                 src={`https://image.tmdb.org/t/p/w500${movieInfo.poster_path}`} 
                 alt={`Poster van ${movieInfo.title}`} 
+                transition:name={`poster-${id}`}
             />
             
             {/* HIER ontbrak in jouw code de 'tekst-sectie' div! */}
