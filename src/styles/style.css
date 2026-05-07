@@ -141,3 +141,59 @@ body {
     .terug-knop:hover .pijl {
         transform: translateX(-4px); /* De pijl beweegt een stukje naar links */
     }
+
+  body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212;
+        color: white;
+        margin: 0;
+        padding: 40px 20px;
+    }
+
+    main {
+        max-width: 1200px;
+        margin: 0 auto; /* Zet alles netjes in het midden */
+    }
+
+    .hoofdtitel {
+        text-align: center;
+        color: #e50914;
+        margin-bottom: 40px;
+        font-size: 3rem;
+    }
+
+    /* CSS Grid zorgt voor mooie kolommen die automatisch schalen */
+    
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 30px;
+    }
+
+    /* Het klikbare kaartje */
+    .overzicht-kaart {
+        text-decoration: none; /* Haalt het standaard blauwe link-streepje weg */
+        color: white;
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s; /* Voor een soepele zweef-animatie */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .overzicht-kaart:hover {
+        transform: scale(1.05); /* Maakt het kaartje iets groter als je erover zweeft */
+    }
+
+    .overzicht-poster {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .overzicht-titel {
+        font-size: 1.1rem;
+        text-align: center;
+        padding: 15px 10px;
+        margin: 0;
+    }  
