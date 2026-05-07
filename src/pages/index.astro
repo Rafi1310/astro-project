@@ -3,7 +3,7 @@ import "../styles/style.css"; // Zorg dat dit pad klopt!
 
 const token = import.meta.env.TMDB_TOKEN;
 // Het 'now_playing' endpoint voor recente films
-const url = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1';
+
 
 const options = {
     method: 'GET',
@@ -13,11 +13,19 @@ const options = {
     }
 };
 
-const response = await fetch(url, options);
-const data = await response.json();
+// Vraag Pagina 1 op
+const urlPage1 = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1';
+const response1 = await fetch(urlPage1, options);
+const data1 = await response1.json();
 
-// De array met 20 films zit in 'data.results'
-const movies = data.results; 
+// Vraag Pagina 2 op
+const urlPage2 = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=2';
+const response2 = await fetch(urlPage2, options);
+const data2 = await response2.json();
+
+// Plak de twee lijstjes aan elkaar vast! 
+// De drie puntjes (...) heten de 'spread operator' en halen de films uit hun lijstje om ze samen in één grote nieuwe lijst te stoppen.
+const movies = [...data1.results, ...data2.results];
 ---
 
 <html lang="nl">

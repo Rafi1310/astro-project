@@ -4,23 +4,27 @@ import "../../styles/style.css";
 // 1. NIEUW: Vertel Astro welke ID's er allemaal bestaan!
 export async function getStaticPaths() {
     const token = import.meta.env.TMDB_TOKEN;
-    const lijstUrl = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1';
-    
     const options = {
         method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`
-        }
+        headers: { 
+            accept: 'application/json', 
+            Authorization: `Bearer ${token}` }
     };
 
-    const response = await fetch(lijstUrl, options);
-    const data = await response.json();
+    // Haal pagina 1 en 2 op
+    const response1 = await fetch('https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1', options);
+    const data1 = await response1.json();
+    
+    const response2 = await fetch('https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=2', options);
+    const data2 = await response2.json();
 
-    // Geef een lijst terug aan Astro met alle film ID's
-    return data.results.map((movie: any) => {
+    // Plak ze aan elkaar vast
+    const allMovies = [...data1.results, ...data2.results];
+
+    // Geef de hele lijst van 40 ID's door aan Astro
+    return allMovies.map((movie: any) => {
         return {
-            params: { id: movie.id.toString() } // Astro eist dat het ID een tekst (string) is
+            params: { id: movie.id.toString() }
         };
     });
 }
