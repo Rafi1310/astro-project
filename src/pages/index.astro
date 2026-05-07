@@ -1,12 +1,10 @@
 ---
-import "../styles/style.css";
-const baseURL = 'https://api.themoviedb.org/3'
-const endpoint = '/movie/122?append_to_response=videos' // Bijvoorbeeld de ID voor Inception
-const url = baseURL + endpoint
+import "../styles/style.css"; // Zorg dat dit pad klopt!
 
 const token = import.meta.env.TMDB_TOKEN;
+// Het 'now_playing' endpoint voor recente films
+const url = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1';
 
-// 1. Maak je options object met de Bearer token
 const options = {
     method: 'GET',
     headers: {
@@ -15,121 +13,100 @@ const options = {
     }
 };
 
-// 2. Geef de options mee als tweede parameter in je fetch
-let response = await fetch(url, options)
+const response = await fetch(url, options);
+const data = await response.json();
 
-// 3. Pak de JSON data uit
-let movieInfo = await response.json();
-
-let trailerInfo: any = null;
-
-if (movieInfo.videos && movieInfo.videos.results) {
-    trailerInfo = movieInfo.videos.results.find(
-        (video: any) => video.site === 'YouTube' && video.type === 'Trailer'
-    );
-}
-// 4. Print de data in je console
-console.log(movieInfo)
+// De array met 20 films zit in 'data.results'
+const movies = data.results; 
 ---
 
 <html lang="nl">
-    <head>
-        <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width" />
-        <meta name="generator" content={Astro.generator} />
-        {/* Zet de titel van de pagina dynamisch */}
-        <title>{movieInfo.title}</title> 
-    </head>
-    <body>
-        
-    <div class="movie-card">
-        
-        {/* 1. De Header Sectie (Poster + Tekst) */}
-        <div class="header-sectie">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Nieuwste Films - Overzicht</title>
+</head>
+<body>
+    <main>
+        <h1 class="hoofdtitel">Nu in de Bioscoop</h1>
+
+        {/* De grid waar alle films in komen */}
+        <div class="movie-grid">
             
-            {/* De Filmposter */}
-            <img 
-                class="poster" 
-                src={`https://image.tmdb.org/t/p/w500${movieInfo.poster_path}`} 
-                alt={`Poster van ${movieInfo.title}`} 
-            />
-            
-            {/* HIER ontbrak in jouw code de 'tekst-sectie' div! */}
-            <div class="tekst-sectie">
-                <h1>{movieInfo.title}</h1>
-                <p class="tagline">{movieInfo.tagline}</p>
-                <p class="overview">{movieInfo.overview}</p>
-            </div> 
-            
-        </div> {/* Hier sluiten we de header-sectie div af */}
-
-        {/* 2. De Trailer Sectie */}
-        <h2>Trailer</h2>
-
-        {trailerInfo ? (
-            <>
-                <div id="trailer-container">
-                    <iframe 
-                        id="youtube-speler"
-                        src={`https://www.youtube.com/embed/${trailerInfo.key}`} 
-                        title={`Trailer van ${movieInfo.title}`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                    </iframe>
-                </div>
-
-                <button id="pip-knop">
-                    Open in Picture-in-Picture 🔲
-                </button>
-            </>
-        ) : (
-            <p class="error-msg">Helaas, er is geen YouTube trailer gevonden voor deze film.</p>
-        )}
-        
-    </div> {/* Hier sluit de movie-card */}
-
-    <script>
-        //@ts-nocheck
-        // 1. Zoek de knop, de container en de speler op
-        const pipKnop = document.getElementById('pip-knop');
-        const trailerContainer = document.getElementById('trailer-container');
-        const youtubeSpeler = document.getElementById('youtube-speler');
-
-        // Check of alles bestaat (voorkomt foutmeldingen als er geen trailer is)
-        if (pipKnop && youtubeSpeler && trailerContainer) {
-            
-            // 2. Luister naar een klik op de knop
-            pipKnop.addEventListener('click', async () => {
+            {/* We 'loopen' over elke film en maken er een klikbaar kaartje van */}
+            {movies.map((movie: any) => (
                 
-                // 3. Controleer of de browser deze nieuwe API ondersteunt
-                if ('documentPictureInPicture' in window) {
-                    try {
-                        // Open het zwevende PiP schermpje
-                        const pipWindow = await window.documentPictureInPicture.requestWindow({
-                            width: 560,
-                            height: 315,
-                        });
+                // De link gaat naar /movie/ID_VAN_DE_FILM
+                <a href={`/movie/${movie.id}`} class="overzicht-kaart">
+                    <img 
+                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                        alt={movie.title} 
+                        class="overzicht-poster"
+                    />
+                    <h2 class="overzicht-titel">{movie.title}</h2>
+                </a>
 
-                        // Verplaats de YouTube speler naar het nieuwe scherm
-                        pipWindow.document.body.appendChild(youtubeSpeler);
-                        // Haal de witruimte in het nieuwe schermpje weg
-                        pipWindow.document.body.style.margin = '0';
+            ))}
 
-                        // 4. Wat te doen als de gebruiker het PiP schermpje sluit?
-                        pipWindow.addEventListener('pagehide', () => {
-                            trailerContainer.appendChild(youtubeSpeler);
-                        });
-
-                    } catch (error) {
-                        console.error("PiP is mislukt:", error);
-                    }
-                } else {
-                    alert("Oeps! Jouw browser ondersteunt de Document PiP API helaas nog niet.");
-                }
-            });
-        }
-    </script>
-    </body>
+        </div>
+    </main>
+</body>
 </html>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212;
+        color: white;
+        margin: 0;
+        padding: 40px 20px;
+    }
+
+    main {
+        max-width: 1200px;
+        margin: 0 auto; /* Zet alles netjes in het midden */
+    }
+
+    .hoofdtitel {
+        text-align: center;
+        color: #e50914;
+        margin-bottom: 40px;
+        font-size: 3rem;
+    }
+
+    /* CSS Grid zorgt voor mooie kolommen die automatisch schalen */
+    
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 30px;
+    }
+
+    /* Het klikbare kaartje */
+    .overzicht-kaart {
+        text-decoration: none; /* Haalt het standaard blauwe link-streepje weg */
+        color: white;
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s; /* Voor een soepele zweef-animatie */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .overzicht-kaart:hover {
+        transform: scale(1.05); /* Maakt het kaartje iets groter als je erover zweeft */
+    }
+
+    .overzicht-poster {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .overzicht-titel {
+        font-size: 1.1rem;
+        text-align: center;
+        padding: 15px 10px;
+        margin: 0;
+    }
+</style>

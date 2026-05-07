@@ -1,0 +1,163 @@
+---
+import "../../styles/style.css";
+
+// 1. NIEUW: Vertel Astro welke ID's er allemaal bestaan!
+export async function getStaticPaths() {
+    const token = import.meta.env.TMDB_TOKEN;
+    const lijstUrl = 'https://api.themoviedb.org/3/movie/now_playing?language=nl-NL&page=1';
+    
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`
+        }
+    };
+
+    const response = await fetch(lijstUrl, options);
+    const data = await response.json();
+
+    // Geef een lijst terug aan Astro met alle film ID's
+    return data.results.map((movie: any) => {
+        return {
+            params: { id: movie.id.toString() } // Astro eist dat het ID een tekst (string) is
+        };
+    });
+}
+// Haal het ID uit de URL (bijv. als de link /movie/27205 is, is id "27205")
+const { id } = Astro.params; 
+
+const baseURL = 'https://api.themoviedb.org/3'
+// Plak het dynamische ID in de string met `${id}`
+const endpoint = `/movie/${id}?append_to_response=videos&language=nl-NL`
+const url = baseURL + endpoint
+
+const token = import.meta.env.TMDB_TOKEN;
+
+// 1. Maak je options object met de Bearer token
+const options = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${token}`
+    }
+};
+
+// 2. Geef de options mee als tweede parameter in je fetch
+let response = await fetch(url, options)
+
+// 3. Pak de JSON data uit
+let movieInfo = await response.json();
+
+let trailerInfo: any = null;
+
+if (movieInfo.videos && movieInfo.videos.results) {
+    trailerInfo = movieInfo.videos.results.find(
+        (video: any) => video.site === 'YouTube' && video.type === 'Trailer'
+    );
+}
+// 4. Print de data in je console
+console.log(movieInfo)
+---
+
+<html lang="nl">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        {/* Zet de titel van de pagina dynamisch */}
+        <title>{movieInfo.title}</title> 
+    </head>
+    <body>
+        
+    <div class="movie-card">
+        
+        {/* 1. De Header Sectie (Poster + Tekst) */}
+        <div class="header-sectie">
+            
+            {/* De Filmposter */}
+            <img 
+                class="poster" 
+                src={`https://image.tmdb.org/t/p/w500${movieInfo.poster_path}`} 
+                alt={`Poster van ${movieInfo.title}`} 
+            />
+            
+            {/* HIER ontbrak in jouw code de 'tekst-sectie' div! */}
+            <div class="tekst-sectie">
+                <h1>{movieInfo.title}</h1>
+                <p class="tagline">{movieInfo.tagline}</p>
+                <p class="overview">{movieInfo.overview}</p>
+            </div> 
+            
+        </div> {/* Hier sluiten we de header-sectie div af */}
+
+        {/* 2. De Trailer Sectie */}
+        <h2>Trailer</h2>
+
+        {trailerInfo ? (
+            <>
+                <div id="trailer-container">
+                    <iframe 
+                        id="youtube-speler"
+                        src={`https://www.youtube.com/embed/${trailerInfo.key}`} 
+                        title={`Trailer van ${movieInfo.title}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <button id="pip-knop">
+                    Open in Picture-in-Picture 🔲
+                </button>
+            </>
+        ) : (
+            <p class="error-msg">Helaas, er is geen YouTube trailer gevonden voor deze film.</p>
+        )}
+        
+    </div> {/* Hier sluit de movie-card */}
+
+    <script>
+        //@ts-nocheck
+        // 1. Zoek de knop, de container en de speler op
+        const pipKnop = document.getElementById('pip-knop');
+        const trailerContainer = document.getElementById('trailer-container');
+        const youtubeSpeler = document.getElementById('youtube-speler');
+
+        // Check of alles bestaat (voorkomt foutmeldingen als er geen trailer is)
+        if (pipKnop && youtubeSpeler && trailerContainer) {
+            
+            // 2. Luister naar een klik op de knop
+            pipKnop.addEventListener('click', async () => {
+                
+                // 3. Controleer of de browser deze nieuwe API ondersteunt
+                if ('documentPictureInPicture' in window) {
+                    try {
+                        // Open het zwevende PiP schermpje
+                        const pipWindow = await window.documentPictureInPicture.requestWindow({
+                            width: 560,
+                            height: 315,
+                        });
+
+                        // Verplaats de YouTube speler naar het nieuwe scherm
+                        pipWindow.document.body.appendChild(youtubeSpeler);
+                        // Haal de witruimte in het nieuwe schermpje weg
+                        pipWindow.document.body.style.margin = '0';
+
+                        // 4. Wat te doen als de gebruiker het PiP schermpje sluit?
+                        pipWindow.addEventListener('pagehide', () => {
+                            trailerContainer.appendChild(youtubeSpeler);
+                        });
+
+                    } catch (error) {
+                        console.error("PiP is mislukt:", error);
+                    }
+                } else {
+                    alert("Oeps! Jouw browser ondersteunt de Document PiP API helaas nog niet.");
+                }
+            });
+        }
+    </script>
+    </body>
+</html>
